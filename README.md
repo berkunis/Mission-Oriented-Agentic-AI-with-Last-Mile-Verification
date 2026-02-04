@@ -4,7 +4,35 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A production-ready demonstration of **verified agentic AI** for mission-critical environments. This project showcases enterprise AI engineering patterns including CI/CD, containerization, observability, security, and MLOps.
+## V0 Research Prototype
+
+> **Note:** This is a **V0 research prototype** demonstrating trust, correctness, correction, and auditability in agentic AI systems. It is not a production platform.
+
+### CI Scope
+
+The CI pipeline is intentionally scoped to validate core correctness:
+
+| Job | Status | Purpose |
+|-----|--------|---------|
+| **Unit Tests** | Blocking | Validates verifiers and agent controller |
+| **Security Scan** | Blocking | Ensures no security vulnerabilities |
+| **Lint** | Non-blocking | Code style (informational only) |
+| **Type Check** | Non-blocking | Static analysis (informational only) |
+| **Docker Build** | Skipped | Out of scope for V0 |
+| **Integration Tests** | Skipped | Out of scope for V0 |
+
+### Future Work (Production Hardening)
+
+The following are planned for production readiness but out of scope for this research prototype:
+- Multi-version Python testing matrix
+- Strict lint and type-check enforcement
+- Container builds and vulnerability scanning
+- Integration and end-to-end testing
+- API and deployment validation
+
+---
+
+A verification-first research prototype demonstrating **verified agentic AI** for mission-critical environments. The focus is on trust, correctness, correction, and auditability rather than platform completeness.
 
 ## Core Thesis
 
