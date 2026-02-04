@@ -1,0 +1,8 @@
+# Kubernetes Namespace for NL-to-SQL application
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nl-to-sql
+  labels:
+    app.kubernetes.io/name: nl-to-sql
+    app.kubernetes.io/part-of: nl-to-sql-verified

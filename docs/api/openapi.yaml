@@ -1,0 +1,355 @@
+openapi: 3.1.0
+info:
+  title: NL-to-SQL Verified API
+  description: |
+    Mission-oriented agentic AI with last-mile verification.
+    Converts natural language queries to verified SQL.
+
+    ## Authentication
+    All API endpoints (except health checks) require an API key.
+    Include the key in the `X-API-Key` header.
+
+    ## Rate Limiting
+    Default: 100 requests per minute per API key.
+    When exceeded, returns 429 with Retry-After header.
+  version: 0.1.0
+  contact:
+    name: API Support
+  license:
+    name: MIT
+    identifier: MIT
+
+servers:
+  - url: http://localhost:8000
+    description: Local development
+  - url: https://api.example.com
+    description: Production
+
+tags:
+  - name: Query
+    description: SQL query generation endpoints
+  - name: Health
+    description: Health and readiness checks
+
+paths:
+  /api/v1/query:
+    post:
+      summary: Convert natural language to verified SQL
+      description: |
+        Takes a natural language question and returns a verified SQL query.
+
+        The query goes through:
+        1. SQL generation via configured LLM
+        2. Syntax verification
+        3. Schema validation
+        4. Safety checks
+        5. Semantic verification
+
+        If verification fails, automatic correction is attempted (up to max_retries).
+      operationId: processQuery
+      tags:
+        - Query
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryRequest'
+            examples:
+              simple:
+                summary: Simple query
+                value:
+                  query: "Show me all premium customers"
+              with_audit:
+                summary: Query with audit trail
+                value:
+                  query: "What is the total revenue?"
+                  include_audit: true
+              with_retries:
+                summary: Custom retry limit
+                value:
+                  query: "List top 5 products"
+                  max_retries: 5
+      responses:
+        '200':
+          description: Query processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResponse'
+              examples:
+                success:
+                  summary: Successful query
+                  value:
+                    success: true
+                    sql: "SELECT name, email FROM customers WHERE tier = 'premium'"
+                    original_query: "Show me all premium customers"
+                    attempts: 1
+                    message: "Query verified successfully after 1 attempt(s)"
+                    request_id: "abc123-def456"
+                    processing_time_ms: 15.2
+                failure:
+                  summary: Failed query
+                  value:
+                    success: false
+                    sql: null
+                    original_query: "Delete everything"
+                    attempts: 3
+                    message: "Failed to generate valid SQL after 3 attempts"
+                    request_id: "xyz789"
+                    processing_time_ms: 450.5
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Seconds until rate limit resets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /health:
+    get:
+      summary: Health check
+      description: Returns the health status of the service
+      operationId: healthCheck
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /ready:
+    get:
+      summary: Readiness check
+      description: Returns whether the service is ready to handle requests
+      operationId: readinessCheck
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessResponse'
+
+  /live:
+    get:
+      summary: Liveness check
+      description: Simple liveness probe
+      operationId: livenessCheck
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is alive
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+
+  /metrics:
+    get:
+      summary: Prometheus metrics
+      description: Returns Prometheus-formatted metrics
+      operationId: getMetrics
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Metrics in Prometheus format
+          content:
+            text/plain:
+              schema:
+                type: string
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for authentication
+
+  schemas:
+    QueryRequest:
+      type: object
+      required:
+        - query
+      properties:
+        query:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: Natural language question to convert to SQL
+          example: "Show me all premium customers"
+        max_retries:
+          type: integer
+          minimum: 0
+          maximum: 10
+          description: Maximum number of correction attempts (default: 3)
+        include_audit:
+          type: boolean
+          default: false
+          description: Include full audit trail in response
+
+    QueryResponse:
+      type: object
+      required:
+        - success
+        - original_query
+        - attempts
+        - message
+        - request_id
+        - processing_time_ms
+      properties:
+        success:
+          type: boolean
+          description: Whether SQL generation succeeded
+        sql:
+          type: string
+          nullable: true
+          description: Generated SQL query (if successful)
+        original_query:
+          type: string
+          description: Original natural language query
+        attempts:
+          type: integer
+          description: Number of generation attempts
+        message:
+          type: string
+          description: Status message
+        audit_trail:
+          type: array
+          nullable: true
+          description: Full audit trail (if requested)
+          items:
+            $ref: '#/components/schemas/AuditEntry'
+        request_id:
+          type: string
+          description: Unique request identifier
+        processing_time_ms:
+          type: number
+          description: Processing time in milliseconds
+
+    AuditEntry:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp
+        step:
+          type: string
+          description: Step identifier
+        input_data:
+          type: object
+          additionalProperties: true
+        output_data:
+          type: object
+          additionalProperties: true
+        verification_results:
+          type: array
+          items:
+            $ref: '#/components/schemas/VerificationResult'
+
+    VerificationResult:
+      type: object
+      properties:
+        verifier_name:
+          type: string
+          description: Name of the verifier
+        status:
+          type: string
+          enum: [passed, failed, skipped]
+          description: Verification status
+        message:
+          type: string
+          description: Verification message
+        details:
+          type: object
+          additionalProperties: true
+          description: Additional details
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+          description: Overall health status
+        version:
+          type: string
+          description: API version
+        timestamp:
+          type: string
+          format: date-time
+        checks:
+          type: object
+          additionalProperties:
+            type: boolean
+          description: Individual component health checks
+
+    ReadinessResponse:
+      type: object
+      properties:
+        ready:
+          type: boolean
+          description: Whether the service is ready
+        checks:
+          type: object
+          additionalProperties:
+            type: boolean
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error type
+        message:
+          type: string
+          description: Error message
+        request_id:
+          type: string
+          nullable: true
+          description: Request ID if available
+        details:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: Additional error details

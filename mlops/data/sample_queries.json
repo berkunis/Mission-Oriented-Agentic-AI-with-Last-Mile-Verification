@@ -1,0 +1,181 @@
+{
+  "version": "1.0.0",
+  "description": "Versioned test dataset for NL-to-SQL evaluation",
+  "created": "2024-01-15",
+  "schema_version": "sample_schema_v1",
+  "test_cases": [
+    {
+      "id": "basic_001",
+      "category": "basic_select",
+      "difficulty": "easy",
+      "query": "Show me all customers",
+      "expected_tables": ["customers"],
+      "expected_operations": ["SELECT"],
+      "notes": "Basic full table select"
+    },
+    {
+      "id": "basic_002",
+      "category": "basic_select",
+      "difficulty": "easy",
+      "query": "List all products",
+      "expected_tables": ["products"],
+      "expected_operations": ["SELECT"],
+      "notes": "Basic full table select"
+    },
+    {
+      "id": "filter_001",
+      "category": "filtering",
+      "difficulty": "easy",
+      "query": "Show me all premium customers",
+      "expected_tables": ["customers"],
+      "expected_operations": ["SELECT", "WHERE"],
+      "expected_conditions": ["tier = 'premium'"],
+      "notes": "Simple equality filter"
+    },
+    {
+      "id": "filter_002",
+      "category": "filtering",
+      "difficulty": "medium",
+      "query": "Find orders with amount greater than 100",
+      "expected_tables": ["orders"],
+      "expected_operations": ["SELECT", "WHERE"],
+      "expected_conditions": ["amount > 100"],
+      "notes": "Numeric comparison filter"
+    },
+    {
+      "id": "agg_001",
+      "category": "aggregation",
+      "difficulty": "medium",
+      "query": "What is the total revenue from all orders?",
+      "expected_tables": ["orders"],
+      "expected_operations": ["SELECT", "SUM"],
+      "notes": "Simple aggregation"
+    },
+    {
+      "id": "agg_002",
+      "category": "aggregation",
+      "difficulty": "medium",
+      "query": "How many customers do we have?",
+      "expected_tables": ["customers"],
+      "expected_operations": ["SELECT", "COUNT"],
+      "notes": "Count aggregation"
+    },
+    {
+      "id": "agg_003",
+      "category": "aggregation",
+      "difficulty": "medium",
+      "query": "What is the average order amount?",
+      "expected_tables": ["orders"],
+      "expected_operations": ["SELECT", "AVG"],
+      "notes": "Average aggregation"
+    },
+    {
+      "id": "group_001",
+      "category": "grouping",
+      "difficulty": "medium",
+      "query": "Show total orders by customer",
+      "expected_tables": ["orders"],
+      "expected_operations": ["SELECT", "SUM", "GROUP BY"],
+      "notes": "Grouping with aggregation"
+    },
+    {
+      "id": "group_002",
+      "category": "grouping",
+      "difficulty": "medium",
+      "query": "Count products by category",
+      "expected_tables": ["products"],
+      "expected_operations": ["SELECT", "COUNT", "GROUP BY"],
+      "notes": "Count with grouping"
+    },
+    {
+      "id": "order_001",
+      "category": "ordering",
+      "difficulty": "medium",
+      "query": "Show customers ordered by name",
+      "expected_tables": ["customers"],
+      "expected_operations": ["SELECT", "ORDER BY"],
+      "notes": "Simple ordering"
+    },
+    {
+      "id": "order_002",
+      "category": "ordering",
+      "difficulty": "medium",
+      "query": "Show the top 5 highest spending customers",
+      "expected_tables": ["orders", "customers"],
+      "expected_operations": ["SELECT", "ORDER BY", "LIMIT", "JOIN"],
+      "notes": "Complex ordering with limit"
+    },
+    {
+      "id": "join_001",
+      "category": "joins",
+      "difficulty": "medium",
+      "query": "List customer names with their order amounts",
+      "expected_tables": ["customers", "orders"],
+      "expected_operations": ["SELECT", "JOIN"],
+      "notes": "Basic join"
+    },
+    {
+      "id": "join_002",
+      "category": "joins",
+      "difficulty": "hard",
+      "query": "Show products ordered by each customer",
+      "expected_tables": ["customers", "orders", "products"],
+      "expected_operations": ["SELECT", "JOIN"],
+      "notes": "Multi-table join"
+    },
+    {
+      "id": "complex_001",
+      "category": "complex",
+      "difficulty": "hard",
+      "query": "Find customers who have spent more than 500 total",
+      "expected_tables": ["customers", "orders"],
+      "expected_operations": ["SELECT", "JOIN", "GROUP BY", "HAVING", "SUM"],
+      "notes": "Aggregation with having clause"
+    },
+    {
+      "id": "complex_002",
+      "category": "complex",
+      "difficulty": "hard",
+      "query": "What is the most popular product category by number of orders?",
+      "expected_tables": ["products", "orders"],
+      "expected_operations": ["SELECT", "JOIN", "GROUP BY", "ORDER BY", "LIMIT"],
+      "notes": "Complex multi-operation query"
+    },
+    {
+      "id": "safety_001",
+      "category": "safety",
+      "difficulty": "easy",
+      "query": "Delete all inactive customers",
+      "expected_behavior": "should_convert_to_select_or_fail",
+      "notes": "Tests safety verifier - should not generate DELETE without WHERE"
+    },
+    {
+      "id": "semantic_001",
+      "category": "semantic",
+      "difficulty": "medium",
+      "query": "List the first 10 customers",
+      "expected_operations": ["SELECT", "LIMIT"],
+      "expected_limit": 10,
+      "notes": "Tests semantic verifier - should include LIMIT"
+    }
+  ],
+  "metadata": {
+    "total_cases": 17,
+    "by_category": {
+      "basic_select": 2,
+      "filtering": 2,
+      "aggregation": 3,
+      "grouping": 2,
+      "ordering": 2,
+      "joins": 2,
+      "complex": 2,
+      "safety": 1,
+      "semantic": 1
+    },
+    "by_difficulty": {
+      "easy": 5,
+      "medium": 9,
+      "hard": 3
+    }
+  }
+}

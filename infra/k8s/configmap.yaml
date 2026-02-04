@@ -1,0 +1,33 @@
+# ConfigMap for NL-to-SQL API configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nl-to-sql-config
+  namespace: nl-to-sql
+  labels:
+    app.kubernetes.io/name: nl-to-sql-api
+data:
+  # Application configuration
+  ENVIRONMENT: "production"
+  LOG_LEVEL: "INFO"
+  LOG_FORMAT: "json"
+  MAX_RETRIES: "3"
+
+  # Observability
+  OTEL_SERVICE_NAME: "nl-to-sql-api"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger-collector.observability:4317"
+
+---
+# Secret for sensitive configuration (example structure)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: nl-to-sql-secrets
+  namespace: nl-to-sql
+  labels:
+    app.kubernetes.io/name: nl-to-sql-api
+type: Opaque
+stringData:
+  # API keys and secrets would go here
+  # In production, use external secrets management (e.g., Vault, AWS Secrets Manager)
+  API_KEY_SALT: "change-me-in-production"
