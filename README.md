@@ -289,6 +289,7 @@ This project demonstrates enterprise AI engineering skills:
 
 ## Documentation
 
+- [Project 101](docs/PROJECT_101.md) - Technical deep-dive for engineers
 - [Quick Start Guide](docs/quickstart.md) - Get running in 5 minutes
 - [Architecture Guide](docs/architecture.md) - System design and components
 - [Design Decisions](docs/design-decisions.md) - Detailed rationale for all architectural choices
